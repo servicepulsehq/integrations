@@ -1,0 +1,22 @@
+# ServicePulse component — use as defs.yaml inside your Dagster defs tree.
+#
+# Typical layouts (pick what matches your project):
+#   my_project/defs/defs.yaml
+#   my_project/defs/components/servicepulse/defs.yaml
+#
+# Requires: pip install dagster-servicepulse (see requirements.txt in this folder).
+#
+# Inspired by https://github.com/eric-thomas-dagster/dagster-component-templates
+
+type: dagster_servicepulse.ServicePulseDefinitionsComponent
+attributes:
+  required_vendors:
+    - stripe
+    - snowflake
+  api_token_env_var: SERVICEPULSE_API_TOKEN
+  base_url: https://servicepulse.dev
+  include_transition_sensor: true
+  transition_sensor_name: vendor_operational_sensor
+  sensor_minimum_interval_seconds: 180
+  allow_maintenance: false
+  allow_unknown: false

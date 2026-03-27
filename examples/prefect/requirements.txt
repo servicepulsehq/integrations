@@ -1,0 +1,4 @@
+prefect>=2.14.0
+# ServicePulse client:
+#   pip install "git+https://github.com/servicepulsehq/integrations.git#subdirectory=servicepulse-client"
+# Or: pip install ../../servicepulse-client

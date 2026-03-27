@@ -1,0 +1,39 @@
+name: ServicePulse vendor gate
+description: Fail the workflow if tracked vendors are not in a safe status (Personal API).
+branding:
+  icon: activity
+  color: blue
+
+inputs:
+  token:
+    description: ServicePulse personal API token (sp_…). Use a secret.
+    required: true
+  base_url:
+    description: API origin (no trailing path)
+    required: false
+    default: https://servicepulse.dev
+  vendor_slugs:
+    description: Comma-separated vendor slugs to check. Empty = all tracked vendors.
+    required: false
+    default: ""
+  allow_maintenance:
+    description: If true, maintenance is not treated as blocking
+    required: false
+    default: "false"
+  allow_unknown:
+    description: If false, unknown status blocks (recommended for CI)
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Check vendor stack
+      shell: bash
+      env:
+        SERVICEPULSE_TOKEN: ${{ inputs.token }}
+        SERVICEPULSE_BASE_URL: ${{ inputs.base_url }}
+        SERVICEPULSE_VENDOR_SLUGS: ${{ inputs.vendor_slugs }}
+        SERVICEPULSE_ALLOW_MAINTENANCE: ${{ inputs.allow_maintenance }}
+        SERVICEPULSE_ALLOW_UNKNOWN: ${{ inputs.allow_unknown }}
+      run: python3 "${{ github.action_path }}/../../scripts/check_stack.py"

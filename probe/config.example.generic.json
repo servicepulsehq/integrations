@@ -1,0 +1,25 @@
+{
+  "checks": [
+    {
+      "name": "any-cli-health",
+      "type": "command",
+      "argv": ["/usr/local/bin/my-healthcheck", "--json"],
+      "timeout_seconds": 30,
+      "heartbeat_url": "${SERVICEPULSE_HEARTBEAT_CLI}"
+    },
+    {
+      "name": "trino-via-sqlalchemy",
+      "type": "sqlalchemy",
+      "url_env": "TRINO_SQLALCHEMY_URL",
+      "query": "SELECT 1",
+      "heartbeat_url": "${SERVICEPULSE_HEARTBEAT_TRINO}"
+    },
+    {
+      "name": "local-sqlite-file",
+      "type": "sqlite",
+      "path_env": "SQLITE_DB_PATH",
+      "query": "SELECT 1",
+      "heartbeat_url": "${SERVICEPULSE_HEARTBEAT_SQLITE}"
+    }
+  ]
+}

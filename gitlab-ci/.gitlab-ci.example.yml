@@ -1,0 +1,27 @@
+# Example: add or merge into your .gitlab-ci.yml
+# Pin the script URL to a commit SHA in production (not only main).
+
+stages:
+  - verify
+  - deploy
+
+# Optional: override in project CI/CD variables
+variables:
+  SERVICEPULSE_CHECK_SCRIPT: "https://raw.githubusercontent.com/servicepulsehq/integrations/main/scripts/check_stack.py"
+
+servicepulse_vendor_gate:
+  stage: verify
+  image: python:3.12-bookworm
+  script:
+    - apt-get update -qq && apt-get install -y -qq curl >/dev/null
+    - curl -fsSL "$SERVICEPULSE_CHECK_SCRIPT" -o /tmp/check_stack.py
+    - python3 /tmp/check_stack.py
+  # SERVICEPULSE_TOKEN must be set in GitLab CI/CD Variables (masked).
+
+deploy_after_gate:
+  stage: deploy
+  needs: ["servicepulse_vendor_gate"]
+  script:
+    - echo "Deploy steps here"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

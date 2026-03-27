@@ -1,0 +1,12 @@
+{
+  "name": "servicepulse-webhook-starter-express",
+  "private": true,
+  "type": "module",
+  "description": "Verify ServicePulse outbound webhook HMAC (X-Signature) with Express",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

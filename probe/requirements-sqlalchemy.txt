@@ -1,0 +1,2 @@
+# Generic SQL via SQLAlchemy 2.x — add your engine driver separately (trino, pyhive, cockroachdb, etc.)
+sqlalchemy>=2.0.0

@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "servicepulse-airflow"
+version = "0.1.0"
+description = "Apache Airflow operator for ServicePulse vendor health gates"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "ServicePulse" }]
+dependencies = [
+  "apache-airflow>=2.7.0",
+  "servicepulse-client>=0.1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["servicepulse_airflow"]

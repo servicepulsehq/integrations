@@ -1,0 +1,20 @@
+{
+  "checks": [
+    {
+      "name": "internal-api",
+      "type": "http",
+      "url": "http://10.0.0.42:8080/health",
+      "method": "GET",
+      "expected_status": 200,
+      "timeout_seconds": 10,
+      "heartbeat_url": "${SERVICEPULSE_HEARTBEAT_API}"
+    },
+    {
+      "name": "payments-postgres",
+      "type": "postgres",
+      "dsn_env": "PAYMENTS_DATABASE_URL",
+      "query": "SELECT 1",
+      "heartbeat_url": "${SERVICEPULSE_HEARTBEAT_DB}"
+    }
+  ]
+}

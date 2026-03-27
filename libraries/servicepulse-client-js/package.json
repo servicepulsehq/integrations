@@ -1,0 +1,33 @@
+{
+  "name": "@servicepulsehq/client",
+  "version": "0.1.0",
+  "description": "ServicePulse Personal API client (tracked vendors) for Node 18+",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepack": "npm run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["servicepulse", "status", "vendors", "api"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/servicepulsehq/integrations.git",
+    "directory": "libraries/servicepulse-client-js"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

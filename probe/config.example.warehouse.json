@@ -1,0 +1,32 @@
+{
+  "checks": [
+    {
+      "name": "snowflake-warehouse",
+      "type": "snowflake",
+      "params_env": "SNOWFLAKE_CONNECT_JSON",
+      "query": "SELECT 1",
+      "heartbeat_url": "${SERVICEPULSE_HEARTBEAT_SNOWFLAKE}"
+    },
+    {
+      "name": "databricks-sql",
+      "type": "databricks",
+      "params_env": "DATABRICKS_SQL_CONNECT_JSON",
+      "query": "SELECT 1",
+      "heartbeat_url": "${SERVICEPULSE_HEARTBEAT_DATABRICKS}"
+    },
+    {
+      "name": "sql-server",
+      "type": "sqlserver",
+      "params_env": "SQLSERVER_CONNECT_JSON",
+      "query": "SELECT 1",
+      "heartbeat_url": "${SERVICEPULSE_HEARTBEAT_MSSQL}"
+    },
+    {
+      "name": "oracle",
+      "type": "oracle",
+      "params_env": "ORACLE_CONNECT_JSON",
+      "query": "SELECT 1 FROM DUAL",
+      "heartbeat_url": "${SERVICEPULSE_HEARTBEAT_ORACLE}"
+    }
+  ]
+}

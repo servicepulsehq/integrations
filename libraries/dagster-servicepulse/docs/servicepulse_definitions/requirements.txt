@@ -1,0 +1,6 @@
+# dagster-servicepulse is distributed from this repo (not on PyPI). Pip install:
+#
+#   pip install "git+https://github.com/servicepulsehq/integrations.git#subdirectory=libraries/dagster-servicepulse"
+#
+# PEP 508 direct reference (same thing):
+dagster-servicepulse @ git+https://github.com/servicepulsehq/integrations.git#subdirectory=libraries/dagster-servicepulse

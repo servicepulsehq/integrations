@@ -1,0 +1,5 @@
+# Optional — Snowflake, Databricks SQL warehouse, SQL Server (TDS), Oracle (thin)
+snowflake-connector-python>=3.10.0
+databricks-sql-connector>=3.4.0
+pymssql>=2.2.11
+oracledb>=2.2.0

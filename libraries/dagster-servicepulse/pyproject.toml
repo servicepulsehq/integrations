@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dagster-servicepulse"
+version = "0.1.0"
+description = "Dagster integration for ServicePulse vendor health gates and sensors"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "ServicePulse" }]
+dependencies = [
+  "dagster>=1.10.0",
+  "servicepulse-client>=0.1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["dagster_servicepulse"]

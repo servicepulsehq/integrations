@@ -1,0 +1,39 @@
+# Example Azure Pipeline — vendor gate then deploy
+# Add a secret variable SERVICEPULSE_API_TOKEN (sp_…) in the pipeline or a variable group.
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  SERVICEPULSE_CHECK_SCRIPT: "https://raw.githubusercontent.com/servicepulsehq/integrations/main/scripts/check_stack.py"
+
+stages:
+  - stage: Verify
+    jobs:
+      - job: ServicePulseVendorGate
+        steps:
+          - bash: |
+              set -euo pipefail
+              curl -fsSL "$(SERVICEPULSE_CHECK_SCRIPT)" -o "$(Agent.TempDirectory)/check_stack.py"
+              python3 "$(Agent.TempDirectory)/check_stack.py"
+            displayName: ServicePulse vendor gate
+            env:
+              SERVICEPULSE_TOKEN: $(SERVICEPULSE_API_TOKEN)
+              # Optional:
+              # SERVICEPULSE_VENDOR_SLUGS: stripe,snowflake
+              # SERVICEPULSE_ALLOW_MAINTENANCE: false
+              # SERVICEPULSE_ALLOW_UNKNOWN: false
+
+  - stage: Deploy
+    dependsOn: Verify
+    condition: succeeded()
+    jobs:
+      - job: DeployApp
+        steps:
+          - bash: echo "Your deploy steps here"
+            displayName: Deploy

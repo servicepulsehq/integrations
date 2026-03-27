@@ -1,0 +1,24 @@
+{
+  "component_type": "dagster_servicepulse.ServicePulseDefinitionsComponent",
+  "description": "ServicePulse vendor health gate job and optional operational→non-operational sensor.",
+  "category": "integrations",
+  "attributes": {
+    "required_vendors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Vendor slugs to check; omit or use [] for full stack."
+    },
+    "api_token_env_var": {
+      "type": "string",
+      "description": "Env var for Personal API token (sp_…)"
+    },
+    "base_url": { "type": "string" },
+    "timeout_s": { "type": "number" },
+    "include_transition_sensor": { "type": "boolean" },
+    "transition_sensor_name": { "type": "string" },
+    "sensor_minimum_interval_seconds": { "type": "integer" },
+    "allow_maintenance": { "type": "boolean" },
+    "allow_unknown": { "type": "boolean" }
+  },
+  "tags": ["servicepulse", "vendor", "sensor", "gate", "observability"]
+}

@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+node_modules/
+
+# Python sdist/wheel output (per package); do not ignore libraries/servicepulse-client-js/dist (committed for git installs)
+servicepulse-client/dist/
+libraries/airflow-servicepulse/dist/
+libraries/dagster-servicepulse/dist/

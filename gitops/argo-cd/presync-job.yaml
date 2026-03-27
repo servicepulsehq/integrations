@@ -1,0 +1,74 @@
+# Argo CD PreSync hook: block sync when ServicePulse reports unhealthy vendors.
+# 1. Create secret: kubectl create secret generic servicepulse-api -n <app-ns> --from-literal=token='sp_...'
+# 2. Replace namespace and optional SERVICEPULSE_VENDOR_SLUGS / BASE_URL.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: servicepulse-vendor-gate
+  namespace: default
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  ttlSecondsAfterFinished: 120
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: gate
+          image: python:3.12-alpine
+          env:
+            - name: SERVICEPULSE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: servicepulse-api
+                  key: token
+            - name: SERVICEPULSE_BASE_URL
+              value: "https://servicepulse.dev"
+            # Comma-separated; leave empty to check all tracked vendors
+            - name: SERVICEPULSE_VENDOR_SLUGS
+              value: ""
+            - name: SERVICEPULSE_ALLOW_MAINTENANCE
+              value: "false"
+            - name: SERVICEPULSE_ALLOW_UNKNOWN
+              value: "false"
+          command:
+            - python
+            - -c
+            - |
+              import json, os, sys, urllib.request
+              DEFAULT_BAD = frozenset({"degraded_performance","partial_outage","major_outage","maintenance"})
+              token = os.environ.get("SERVICEPULSE_TOKEN","").strip()
+              if not token: sys.exit("SERVICEPULSE_TOKEN missing")
+              base = os.environ["SERVICEPULSE_BASE_URL"].rstrip("/")
+              raw = os.environ.get("SERVICEPULSE_VENDOR_SLUGS","").strip()
+              am = os.environ.get("SERVICEPULSE_ALLOW_MAINTENANCE","false").lower() in ("1","true","yes")
+              au = os.environ.get("SERVICEPULSE_ALLOW_UNKNOWN","false").lower() in ("1","true","yes")
+              bad = set(DEFAULT_BAD)
+              if am: bad.discard("maintenance")
+              req = urllib.request.Request(f"{base}/api/v1/tracked-vendors", headers={"Authorization": f"Bearer {token}","Accept":"application/json"})
+              try:
+                with urllib.request.urlopen(req, timeout=60) as r:
+                  data = json.load(r)
+              except Exception as e:
+                print(e, file=sys.stderr); sys.exit(1)
+              rows = data.get("vendors") or []
+              by = {}
+              for row in rows:
+                  v = row.get("vendor") or {}
+                  s = (v.get("slug") or "").strip().lower()
+                  if s: by[s] = v
+              slugs = [x.strip().lower() for x in raw.split(",") if x.strip()] if raw else sorted(by.keys())
+              bad_rows, missing = [], []
+              for slug in slugs:
+                  if slug not in by:
+                      missing.append(slug); continue
+                  st = (by[slug].get("currentStatus") or "").strip() or "unknown"
+                  if st == "unknown" and not au: bad_rows.append((slug,st))
+                  elif st in bad: bad_rows.append((slug,st))
+              if bad_rows or missing:
+                  if bad_rows: print("Unhealthy:", ", ".join(f"{a}={b}" for a,b in bad_rows), file=sys.stderr)
+                  if missing: print("Missing:", ", ".join(sorted(set(missing))), file=sys.stderr)
+                  sys.exit(1)
+              print("ServicePulse OK", len(slugs), "vendor(s)")

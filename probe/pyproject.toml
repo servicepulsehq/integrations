@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "servicepulse-probe"
+version = "0.3.0"
+description = "Poll internal HTTP/DB from your network; ping ServicePulse heartbeats on success"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = []
+
+[project.optional-dependencies]
+db = ["psycopg2-binary>=2.9", "pymysql>=1.1"]
+warehouse = [
+  "snowflake-connector-python>=3.10.0",
+  "databricks-sql-connector>=3.4.0",
+  "pymssql>=2.2.11",
+  "oracledb>=2.2.0",
+]
+sqlalchemy = ["sqlalchemy>=2.0.0"]
+
+[project.scripts]
+servicepulse-probe = "servicepulse_probe.probe:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
