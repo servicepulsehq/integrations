@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable, Literal, Sequence
 
 import httpx
 
@@ -30,6 +30,15 @@ class StackNotHealthyError(ServicePulseError):
         self.missing_slugs = missing_slugs
 
 
+PushedStatus = Literal[
+    "operational",
+    "degraded_performance",
+    "partial_outage",
+    "major_outage",
+    "maintenance",
+]
+
+
 class ServicePulseClient:
     """Personal API client (Bearer sp_…)."""
 
@@ -40,6 +49,64 @@ class ServicePulseClient:
         self._base = base_url.rstrip("/")
         self._headers = {"Authorization": f"Bearer {token}"}
         self._timeout = timeout_s
+
+    def push_service_status(
+        self,
+        ingest_token: str,
+        service_id: str,
+        status: PushedStatus,
+        *,
+        title: str | None = None,
+        message: str | None = None,
+    ) -> None:
+        """
+        Push your service's own health status to ServicePulse.
+
+        Use this when your pipeline or job knows its own health independent of
+        upstream vendor status — e.g., an ETL job that's failing, an ML pipeline
+        with elevated latency, or a data product that's degraded.
+
+        The pushed status is combined with vendor dependency status using worst-of
+        semantics, so ``degraded_performance`` from your pipeline will surface on
+        the status page even when all tracked vendors are operational.
+
+        Args:
+            ingest_token: The push endpoint token from ServicePulse
+                          (Settings → Push Endpoints → copy token).
+                          This is *separate* from your Personal API token.
+            service_id:   The ServicePulse service ID to update.
+            status:       One of ``operational``, ``degraded_performance``,
+                          ``partial_outage``, ``major_outage``, ``maintenance``.
+            title:        Optional short description shown in the app/status page.
+            message:      Optional longer detail string.
+        """
+        ingest_token = (ingest_token or "").strip()
+        if not ingest_token:
+            raise ValueError("ingest_token is required for push_service_status")
+        if not service_id:
+            raise ValueError("service_id is required")
+
+        url = f"{self._base}/api/ingest/{ingest_token}"
+        payload: dict[str, Any] = {
+            "type": "service_status",
+            "serviceId": service_id,
+            "status": status,
+        }
+        if title is not None:
+            payload["title"] = title
+        if message is not None:
+            payload["message"] = message
+
+        try:
+            with httpx.Client(timeout=self._timeout) as client:
+                r = client.post(url, json=payload)
+                r.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            raise ServicePulseError(
+                f"ServicePulse ingest error {e.response.status_code}: {e.response.text[:500]}"
+            ) from e
+        except httpx.RequestError as e:
+            raise ServicePulseError(f"ServicePulse request failed: {e}") from e
 
     def get_tracked_vendors(self) -> dict[str, Any]:
         url = f"{self._base}/api/v1/tracked-vendors"
